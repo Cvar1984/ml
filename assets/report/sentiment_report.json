@@ -1,0 +1,81 @@
+[
+    {
+        "overall": {
+            "accuracy": 1,
+            "balanced accuracy": 1,
+            "f1 score": 1,
+            "precision": 1,
+            "recall": 1,
+            "specificity": 1,
+            "negative predictive value": 1,
+            "false discovery rate": 0,
+            "miss rate": 0,
+            "fall out": 0,
+            "false omission rate": 0,
+            "mcc": 1,
+            "informedness": 1,
+            "markedness": 1,
+            "true positives": 9,
+            "true negatives": 9,
+            "false positives": 0,
+            "false negatives": 0,
+            "cardinality": 9
+        },
+        "classes": {
+            "positive": {
+                "accuracy": 1,
+                "balanced accuracy": 1,
+                "f1 score": 1,
+                "precision": 1,
+                "recall": 1,
+                "specificity": 1,
+                "negative predictive value": 1,
+                "false discovery rate": 0,
+                "miss rate": 0,
+                "fall out": 0,
+                "false omission rate": 0,
+                "informedness": 1,
+                "markedness": 1,
+                "mcc": 1,
+                "true positives": 3,
+                "true negatives": 6,
+                "false positives": 0,
+                "false negatives": 0,
+                "cardinality": 3,
+                "proportion": 0.3333333333333333
+            },
+            "negative": {
+                "accuracy": 1,
+                "balanced accuracy": 1,
+                "f1 score": 1,
+                "precision": 1,
+                "recall": 1,
+                "specificity": 1,
+                "negative predictive value": 1,
+                "false discovery rate": 0,
+                "miss rate": 0,
+                "fall out": 0,
+                "false omission rate": 0,
+                "informedness": 1,
+                "markedness": 1,
+                "mcc": 1,
+                "true positives": 6,
+                "true negatives": 3,
+                "false positives": 0,
+                "false negatives": 0,
+                "cardinality": 6,
+                "proportion": 0.6666666666666666
+            }
+        }
+    },
+    {
+        "positive": {
+            "positive": 3,
+            "negative": 0
+        },
+        "negative": {
+            "positive": 0,
+            "negative": 6
+        }
+    }
+]
