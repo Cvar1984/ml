@@ -1,0 +1,15 @@
+{
+    "name": "cvar1984/ml",
+    "description": "Machine Learning project",
+    "type": "project",
+    "require": {
+        "rubix/ml": "^1.2"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Cvar1984\\Ml\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
