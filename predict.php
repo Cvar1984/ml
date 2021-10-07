@@ -11,13 +11,14 @@ ini_set('memory_limit', '-1');
 
 $logger = new Screen();
 
-$estimator = PersistentModel::load(
-    new Filesystem('assets/rubix/sentiment.rbx')
-);
+$rubixDataPath = 'assets/rubix/sentiment.rbx';
+
+$estimator = PersistentModel::load(new Filesystem($rubixDataPath));
 
 while (empty($text)) $text = readline("Enter some text to analyze:\n");
 
 $dataset = new Unlabeled([[$text]]);
 $prediction = current($estimator->predict($dataset));
+$prediction = ($prediction > 0) ? 'positive' : 'negative';
 
 $logger->info('The sentiment is: ' . $prediction);

@@ -14,15 +14,19 @@ use League\Csv\Statement;
 
 ini_set('memory_limit', '-1');
 
-$stream = fopen('assets/dataset/sentiment.csv', 'r');
-$csv = Reader::createFromStream($stream);
+$rubixModelPath = 'assets/rubix/sentiment.rbx';
+$reportDataPath = 'assets/report/sentiment.json';
+$labeledDataPath = 'assets/dataset/sentiment.csv';
+
+// WARNING you should avoid using training dataset for testing process
+$csv = Reader::createFromPath($labeledDataPath);
 $csv->setDelimiter(',');
 $csv->setHeaderOffset(0);
 
 //build a statement
 $stmt = Statement::create()
     ->offset(0)
-    ->limit(-1);
+    ->limit($argv[1]); // limit rows to be loaded
 
 //query your records from the document
 $records = $stmt->process($csv);
@@ -33,16 +37,12 @@ foreach ($records as $record) {
     $labels[] = $record['label'];
 }
 
-fclose($stream);
-
 $logger = new Screen();
 $logger->info('Loading data into memory');
 
-$dataset = Labeled::build($samples, $labels)->randomize()->take(10000);
+$dataset = Labeled::build($samples, $labels)->randomize()->take(96328);
 
-$estimator = PersistentModel::load(
-    new Filesystem('assets/rubix/sentiment.rbx')
-);
+$estimator = PersistentModel::load(new Filesystem($rubixModelPath));
 
 $logger->info('Making predictions');
 
@@ -57,6 +57,6 @@ $results = $report->generate($predictions, $dataset->labels());
 $logger->info($results);
 $results
     ->toJSON()
-    ->saveTo(new Filesystem('assets/report/sentiment.json'));
+    ->saveTo(new Filesystem($reportDataPath));
 
 $logger->info('Report saved');
