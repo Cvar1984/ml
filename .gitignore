@@ -1,1 +1,5 @@
 /vendor
+/assets/report/*
+/assets/rubix/*
+/assets/dataset/progress.csv
+
