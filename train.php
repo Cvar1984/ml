@@ -6,9 +6,10 @@ use Rubix\ML\Loggers\Screen;
 use Rubix\ML\Datasets\Labeled;
 use Rubix\ML\PersistentModel;
 use Rubix\ML\Pipeline;
-use Rubix\ML\Transformers\TextNormalizer;
-use Rubix\ML\Transformers\WordCountVectorizer;
 use Rubix\ML\Tokenizers\NGram;
+use Rubix\ML\Transformers\MultibyteTextNormalizer;
+use Rubix\ML\Transformers\RegexFilter;
+use Rubix\ML\Transformers\WordCountVectorizer;
 use Rubix\ML\Transformers\TfIdfTransformer;
 use Rubix\ML\Transformers\ZScaleStandardizer;
 use Rubix\ML\Classifiers\MultilayerPerceptron;
@@ -19,14 +20,12 @@ use Rubix\ML\NeuralNet\Layers\BatchNorm;
 use Rubix\ML\NeuralNet\ActivationFunctions\LeakyReLU;
 use Rubix\ML\NeuralNet\Optimizers\AdaMax;
 use Rubix\ML\Persisters\Filesystem;
-/* use Rubix\ML\Backends\Amp; */
 use League\Csv\Reader;
 use League\Csv\Statement;
 
 ini_set('memory_limit', '-1');
 
 //load the CSV document from a stream
-
 $rubixModelPath = 'assets/rubix/sentiment.rbx';
 $labeledDataPath = 'assets/dataset/sentiment.csv';
 $progresDataPath = 'assets/dataset/progress.csv';
@@ -53,25 +52,39 @@ $logger = new Screen();
 $logger->info('Loading data into memory');
 $dataset = new Labeled($samples, $labels);
 
+$nodeSize = 100; // The number of nodes in hidden layers.
+$batchSize = 256; // The number of training samples to process at a time
+$vocabularyMaxSize = PHP_INT_MAX; // The maximum number of unique tokens to embed into each document vector.
+$documentMinSize = 0.00008; // The minimum proportion of documents a word must appear in to be added to the vocabulary.
+$documentMaxSize = 0.4; // The maximum proportion of documents a word can appear in to be added to the vocabulary.
+$nGramMinSize = 1; // The minimum number of contiguous words to a token.
+$nGramMaxSize = 2; // The maximum number of contiguous words to a token.
+$alphaSize = 0.0; // The amount of L2 regularization applied to the weights.
 $estimator = new PersistentModel(
     new Pipeline([
-        new TextNormalizer(),
-        new WordCountVectorizer(10000, 0.00008, 0.4, new NGram(1, 2)),
+        new MultibyteTextNormalizer(), // require ext-mbstring
+        new WordCountVectorizer(
+            $vocabularyMaxSize,
+            $documentMinSize,
+            $documentMaxSize,
+            new NGram($nGramMinSize, $nGramMaxSize)
+        ),
         new TfIdfTransformer(),
         new ZScaleStandardizer(),
+        new RegexFilter([
+            RegexFilter::EXTRA_CHARACTERS,
+            RegexFilter::EXTRA_WORDS,
+            RegexFilter::EXTRA_WHITESPACE
+        ])
     ], new MultilayerPerceptron([
-        new Dense(100),
-        new Activation(new LeakyReLU()),
-        new Dense(100),
-        new Activation(new LeakyReLU()),
-        new Dense(100, 0.0, false),
+        new Dense($nodeSize), new Activation(new LeakyReLU()),
+        new Dense($nodeSize), new Activation(new LeakyReLU()),
+        new Dense($nodeSize, $alphaSize, false), // false bias
         new BatchNorm(),
         new Activation(new LeakyReLU()),
-        new Dense(50),
-        new PReLU(),
-        new Dense(50),
-        new PReLU(),
-    ], 256, new AdaMax(0.0001))),
+        new Dense($nodeSize / 2), new PReLU(), // half node
+        new Dense($nodeSize / 2), new PReLU(),
+    ], $batchSize, new AdaMax())), // 0.0001 learning rate
     new Filesystem($rubixModelPath, true)
 );
 
